@@ -1,0 +1,20 @@
+<html>
+  <head>
+    <script src="./vuh.js"></script>
+  </head>
+  <body>
+    <h1>Content</h1>
+    <div id="app">
+      {{message}}
+    </div>
+
+  </body>
+    <script>
+      var app = new Vuh({
+          el: "#app",
+          data: {
+              message: "Hello Vue!"
+          }
+      })
+    </script>
+</html>
