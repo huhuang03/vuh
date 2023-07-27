@@ -44,20 +44,23 @@ const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
 
 // #5992
 const isIgnoreNewlineTag = makeMap('pre,textarea', true)
+// @ts-ignore
 const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
-function decodeAttr (value, shouldDecodeNewlines) {
+function decodeAttr (value: any, shouldDecodeNewlines: any) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
-  return value.replace(re, match => decodingMap[match])
+  // @ts-ignore
+  return value.replace(re, (match: string | number) => decodingMap[match])
 }
 
+// @ts-ignore
 export function parseHTML (html, options) {
-  const stack = []
+  const stack: any[] = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
   let index = 0
-  let last, lastTag
+  let last, lastTag: any
   while (html) {
     last = html
     // Make sure we're not in a plaintext content element like script/style
@@ -146,7 +149,9 @@ export function parseHTML (html, options) {
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
+      // @ts-ignore
       const reStackedTag = reCache[stackedTag] || (reCache[stackedTag] = new RegExp('([\\s\\S]*?)(</' + stackedTag + '[^>]*>)', 'i'))
+      // @ts-ignore
       const rest = html.replace(reStackedTag, function (all, text, endTag) {
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
@@ -179,6 +184,7 @@ export function parseHTML (html, options) {
   // Clean up any remaining tags
   parseEndTag()
 
+  // @ts-ignore
   function advance (n) {
     index += n
     html = html.substring(n)
@@ -209,6 +215,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // @ts-ignore
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
