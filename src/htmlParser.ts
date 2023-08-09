@@ -5,9 +5,9 @@
  * http://erik.eae.net/simplehtmlparser/simplehtmlparser.js
  */
 
-import { makeMap, no } from './util'
-import { isNonPhrasingTag } from './util'
-import { unicodeLetters } from './util'
+import {makeMap, no} from './util'
+import {isNonPhrasingTag} from './util'
+import {unicodeLetters} from './util'
 
 // Regular Expressions for parsing tags and attributes
 const reAttribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
@@ -32,7 +32,7 @@ const decodingMap = {
   '&amp;': '&',
   '&#10;': '\n',
   '&#9;': '\t',
-  '&#39;': "'"
+  '&#39;': '\''
 }
 const encodedAttr = /&(?:lt|gt|quot|amp|#39);/g
 const encodedAttrWithNewLines = /&(?:lt|gt|quot|amp|#39|#10|#9);/g
@@ -42,7 +42,7 @@ const isIgnoreNewlineTag = makeMap('pre,textarea', true)
 // @ts-ignore
 const shouldIgnoreFirstNewline = (tag, html) => tag && isIgnoreNewlineTag(tag) && html[0] === '\n'
 
-function decodeAttr (value: any, shouldDecodeNewlines: any) {
+function decodeAttr(value: any, shouldDecodeNewlines: any) {
   const re = shouldDecodeNewlines ? encodedAttrWithNewLines : encodedAttr
   // @ts-ignore
   return value.replace(re, (match: string | number) => decodingMap[match])
@@ -64,7 +64,7 @@ export type ParseOption = {
 }
 
 // @ts-ignore
-export function parseHTML (html: string, options: ParseOption) {
+export function parseHTML(html: string, options: ParseOption) {
   const stack: any[] = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
@@ -185,7 +185,7 @@ export function parseHTML (html: string, options: ParseOption) {
     if (html === last) {
       options.chars && options.chars(html)
       if (process.env.NODE_ENV !== 'production' && !stack.length && options.warn) {
-        options.warn(`Mal-formatted tag at end of template: "${html}"`, { start: index + html.length })
+        options.warn(`Mal-formatted tag at end of template: "${html}"`, {start: index + html.length})
       }
       break
     }
@@ -195,31 +195,30 @@ export function parseHTML (html: string, options: ParseOption) {
   parseEndTag()
 
   // @ts-ignore
-  function advance (n) {
+  function advance(n) {
     index += n
     html = html.substring(n)
   }
 
-  function parseStartTag () {
+  function parseStartTag() {
     const start = html.match(reStartTagOpen)
     if (start) {
-      const match: any = {
+      const match: { start: number, end?: number, unarySlash?: boolean, attrs: any[], [key: string]: any } = {
         tagName: start[1],
         attrs: [],
         start: index
       }
       advance(start[0].length)
-      let end, attr
+      let end
+      let attr: RegExpMatchArray & { start?: number, end?: number } | null
       while (!(end = html.match(reStartTagClose)) && (attr = html.match(reDynamicArgAttribute) || html.match(reAttribute))) {
-        // @ts-ignore
         attr.start = index
         advance(attr[0].length)
-        // @ts-ignore
         attr.end = index
         match.attrs.push(attr)
       }
       if (end) {
-        match.unarySlash = end[1]
+        match.unarySlash = !!end[1]
         advance(end[0].length)
         match.end = index
         return match
@@ -228,7 +227,7 @@ export function parseHTML (html: string, options: ParseOption) {
   }
 
   // @ts-ignore
-  function handleStartTag (match) {
+  function handleStartTag(match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
 
@@ -262,7 +261,7 @@ export function parseHTML (html: string, options: ParseOption) {
     }
 
     if (!unary) {
-      stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
+      stack.push({tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end})
       lastTag = tagName
     }
 
@@ -271,7 +270,7 @@ export function parseHTML (html: string, options: ParseOption) {
     }
   }
 
-  function parseEndTag (tagName?: any, start?: any, end?: any) {
+  function parseEndTag(tagName?: any, start?: any, end?: any) {
     let pos, lowerCasedTagName
     if (start == null) start = index
     if (end == null) end = index
@@ -298,7 +297,7 @@ export function parseHTML (html: string, options: ParseOption) {
         ) {
           options.warn(
             `tag <${stack[i].tag}> has no matching end tag.`,
-            { start: stack[i].start }
+            {start: stack[i].start}
           )
         }
         if (options.end) {

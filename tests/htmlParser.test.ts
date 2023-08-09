@@ -1,5 +1,4 @@
 import { parseHTML } from '@/htmlParser'
-import {endianness} from 'os';
 
 test('normal simple test', () => {
   parseHTML("<div>hello</div>", {
