@@ -1,7 +1,3 @@
-/**
- * Not type-checking this file because it's mostly vendor code.
- */
-
 /*!
  * HTML Parser By John Resig (ejohn.org)
  * Modified by Juriy "kangax" Zaytsev
@@ -14,16 +10,15 @@ import { isNonPhrasingTag } from './util'
 import { unicodeLetters } from './util'
 
 // Regular Expressions for parsing tags and attributes
-const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
-const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const reAttribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+const reDynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeLetters}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
-const startTagOpen = new RegExp(`^<${qnameCapture}`)
-const startTagClose = /^\s*(\/?)>/
+const reStartTagOpen = new RegExp(`^<${qnameCapture}`)
+const reStartTagClose = /^\s*(\/?)>/
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
-// #7298: escape - to avoid being pased as HTML comment when inlined in page
-const comment = /^<!\--/
+const comment = /^<!--/
 const conditionalComment = /^<!\[/
 
 // Special Elements (can contain anything)
@@ -53,8 +48,23 @@ function decodeAttr (value: any, shouldDecodeNewlines: any) {
   return value.replace(re, (match: string | number) => decodingMap[match])
 }
 
+export type ParseOption = {
+  /**
+   * tag开始的回调
+   *
+   * @param tagName
+   * @param attrs
+   * @param unary is short style like: ' />'
+   * @param start 标签开始的位置
+   * @param end 标签结束的位置
+   */
+  start?: (tagName: string, attrs: any[], unary: boolean, start: number, end: number) => void;
+  end?: (tagName: string, start: number, end: number) => void;
+  [key: string]: any;
+}
+
 // @ts-ignore
-export function parseHTML (html, options) {
+export function parseHTML (html: string, options: ParseOption) {
   const stack: any[] = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
@@ -122,7 +132,7 @@ export function parseHTML (html, options) {
         rest = html.slice(textEnd)
         while (
           !endTag.test(rest) &&
-          !startTagOpen.test(rest) &&
+          !reStartTagOpen.test(rest) &&
           !comment.test(rest) &&
           !conditionalComment.test(rest)
           ) {
@@ -191,7 +201,7 @@ export function parseHTML (html, options) {
   }
 
   function parseStartTag () {
-    const start = html.match(startTagOpen)
+    const start = html.match(reStartTagOpen)
     if (start) {
       const match: any = {
         tagName: start[1],
@@ -200,9 +210,11 @@ export function parseHTML (html, options) {
       }
       advance(start[0].length)
       let end, attr
-      while (!(end = html.match(startTagClose)) && (attr = html.match(dynamicArgAttribute) || html.match(attribute))) {
+      while (!(end = html.match(reStartTagClose)) && (attr = html.match(reDynamicArgAttribute) || html.match(reAttribute))) {
+        // @ts-ignore
         attr.start = index
         advance(attr[0].length)
+        // @ts-ignore
         attr.end = index
         match.attrs.push(attr)
       }
