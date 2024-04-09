@@ -60,6 +60,7 @@ export type ParseOption = {
    */
   start?: (tagName: string, attrs: any[], unary: boolean, start: number, end: number) => void;
   end?: (tagName: string, start: number, end: number) => void;
+  chars?: (text: string, start?: number, end?: number) => void;
   [key: string]: any;
 }
 

@@ -1,4 +1,4 @@
-import { parseHTML } from '@/htmlParser'
+import { parseHTML } from '@/html_parser/htmlParser'
 
 test('normal simple test', () => {
   parseHTML("<div>hello</div>", {
@@ -12,6 +12,9 @@ test('normal simple test', () => {
       expect(tagName).toBe('div')
       expect(start).toBe(10)
       expect(end).toBe(16)
+    },
+    chars: (text, start, end) => {
+      expect(text).toBe('hello')
     }
   })
 })
