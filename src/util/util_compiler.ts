@@ -9,13 +9,4 @@ import {createAstElement} from '@/ast/ast';
  * @param template
  */
 export function parseToAst(template: string) {
-  let curParent: AstElement | null = null
-  parseHTML(template, {
-    start(tagName: string, attrs: any[], unary: boolean, start: number, end: number) {
-      const ele = createAstElement(tagName)
-      if (!unary) {
-        curParent = ele
-      }
-    }
-  })
 }
